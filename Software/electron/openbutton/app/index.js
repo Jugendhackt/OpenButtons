@@ -1,18 +1,13 @@
 import React from "react";
 import { render } from "react-dom";
 const { dialog } = require("electron").remote;
-
+import { MemoryRouter, Route } from "react-router";
+import Home from "./pages/Home";
 const App = props => {
   return (
-    <button
-      onClick={() => {
-        dialog.showOpenDialog({
-          properties: ["openFile", "openDirectory", "multiSelections"]
-        });
-      }}
-    >
-      Random Text
-    </button>
+    <MemoryRouter>
+      <Route exact path="/" render={() => <Home />} />
+    </MemoryRouter>
   );
 };
 
