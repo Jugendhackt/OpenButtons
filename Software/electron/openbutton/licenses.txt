@@ -1,0 +1,22 @@
+MIT			+
+ISC			+
+BSD-2			+
+BSD-3			+
+APACHE-2.0		+
+BSD			+
+WTFPL			+
+LGPL			?+
+APACHE			+
+AFLv2.1			+
+CC_BY 4.0		Author in settings
+Zlib			+
+CC-BY 3.0		Author in settings
+CC0-1.0			+
+MPL			+
+
+
+
+CC-BY
+caniuse-lite: caniuse.com
+spdx: The Linux Foundation Corporation
+spdx-exceptions: Kyle E. Mitchell

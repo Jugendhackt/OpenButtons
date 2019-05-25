@@ -1,0 +1,25 @@
+productName: "IGPlaner Untis Client"
+appId: "com.justusfluegel.igplaner-untis-client"
+
+asar: true
+
+linux:
+  category: "Utility"
+  target:
+    - "AppImage"
+  # - "deb"
+  # - "tar.gz"
+  # arch:
+  #
+  #
+  #
+  #
+  #
+  maintainer: "Justus Fluegel <klettelars@gmail.com>"
+  # homepage: http://jsutusfluegel.ddnss.de/
+directories:
+  output: "release"
+
+win:
+  target:
+    - "nsis"
