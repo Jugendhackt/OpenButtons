@@ -12,26 +12,91 @@ import {
   TableRow,
   TableBody
 } from "@material-ui/core";
-//const ks = require("node-key-sender");
+
+import CommandTableRow from "../parts/CustomTableRow";
+
+const { exec } = require("child_process");
+
+const ks = require("node-key-sender");
 const bluetooth = require("node-bluetooth");
+const BluetoothHandler = require("../parts/BluetoothHandler");
 
 // create bluetooth device instance
+
+//was soll ich tun? ????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????
+
+const commands = { up: "", down: "", left: "", right: "", pressed: "" };
+const bthandler = new BluetoothHandler();
 
 export default class Home extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      commands: {
-        top: "",
-        bottom: "",
-        left: "",
-        right: "",
-        pressed: ""
-      }
+      topTriggered: false,
+      bottomTriggered: false,
+      leftTriggered: false,
+      rightTriggered: false,
+      pressTriggered: false
     };
   }
 
   render() {
+    bthandler.registerListener("joystick", data => {
+      console.log(data);
+      this.setState({
+        topTriggered: data["y"] == "top",
+        bottomTriggered: data["y"] == "bottom",
+        rightTriggered: data["x"] == "right",
+        leftTriggered: data["x"] == "left",
+        pressTriggered: data["btn"] == "1"
+      });
+
+      switch (data["y"]) {
+        case "top":
+          ks.sendCombination(["@17", "@18", "@84"]);
+          setTimeout(() => {
+            ks.sendKeys([
+              "e",
+              "c",
+              "h",
+              "o",
+              "@32",
+              "H",
+              "a",
+              "l",
+              "l",
+              "o",
+              "@523",
+              "W",
+              "e",
+              "l",
+              "t",
+              "@10"
+            ]);
+          }, 2000);
+          console.log(commands["up"]);
+          break;
+        case "bottom":
+          console.log(commands["down"]);
+          break;
+      }
+      switch (data["x"]) {
+        case "right":
+          console.log(commands["right"]);
+          ks.sendKey("@39");
+          //ks.sendCombination(["@18", "@39"]);
+          break;
+        case "left":
+          console.log(commands["left"]);
+          ks.sendKey("@37");
+          //ks.sendCombination(["@18", "@37 "]);
+          break;
+      }
+      if (data["btn"] == "1") {
+        console.log(commands["pressed"]);
+      }
+    });
+
     return (
       <div>
         <AppBar position="static">
@@ -50,33 +115,32 @@ export default class Home extends React.Component {
           />
           <Button
             onClick={() => {
-              console.log(this.state.textFieldValue);
+              ks.sendCombination(["alt", "tab"]);
             }}
           >
             Send
           </Button>
           <Button
+            onClick={() => {
+              exec('echo "SOME TEST!" && PAUSE', (err, stdout, stderr) => {
+                if (err) {
+                  // node couldn't execute the command
+                  return;
+                }
+
+                // the *entire* stdout and stderr (buffered)
+                console.log(`stdout: ${stdout}`);
+                console.log(`stderr: ${stderr}`);
+              });
+            }}
+          >
+            exec
+          </Button>
+          <Button
             variant="contained"
             color="primary"
             onClick={() => {
-              const device = new bluetooth.DeviceINQ();
-
-              device
-                .on("finished", console.log.bind(console, "finished"))
-                .on("found", function found(address, name) {
-                  if (name == "Joystick") {
-                    device.findSerialPortChannel(address, channel => {
-                      console.log(channel);
-                      bluetooth.connect(address, channel, (err, connection) => {
-                        if (err) return console.error(err);
-                        connection.on("data", buffer =>
-                          console.log(JSON.parse(buffer.toString()))
-                        );
-                      });
-                    });
-                  }
-                })
-                .scan();
+              bthandler.connect(() => {});
             }}
           >
             test
@@ -86,50 +150,47 @@ export default class Home extends React.Component {
               <TableHead>
                 <TableRow>
                   <TableCell>Joystick Direction</TableCell>
-                  <TableCell align="right">Command</TableCell>
+                  <TableCell align="left" style={{ width: "75%" }}>
+                    Command
+                  </TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
-                <TableRow key="up">
-                  <TableCell component="th" scope="row">
-                    up
-                  </TableCell>
-                  <TableCell align="right">
-                    <TextField value="give in cmd" />
-                  </TableCell>
-                </TableRow>
-                <TableRow key="down">
-                  <TableCell component="th" scope="row">
-                    down
-                  </TableCell>
-                  <TableCell align="right">
-                    <TextField value="give in cmd" />
-                  </TableCell>
-                </TableRow>
-                <TableRow key="right">
-                  <TableCell component="th" scope="row">
-                    right
-                  </TableCell>
-                  <TableCell align="right">
-                    <TextField value="give in cmd" />
-                  </TableCell>
-                </TableRow>
-                <TableRow key="left">
-                  <TableCell component="th" scope="row">
-                    left
-                  </TableCell>
-                  <TableCell align="right">
-                    <TextField value="give in cmd" />
-                  </TableCell>
-                </TableRow>
-                <TableRow key="press">
-                  <TableCell component="th" scope="row">
-                    press
-                  </TableCell>
-                  <TableCell align="right">
-                    <TextField value="give in cmd" />
-                  </TableCell>
-                </TableRow>
+                <CommandTableRow
+                  inputName="up"
+                  onCommandChanged={newCommand => {
+                    commands["up"] = newCommand;
+                  }}
+                  triggered={this.state.topTriggered}
+                />
+                <CommandTableRow
+                  inputName="down"
+                  onCommandChanged={newCommand => {
+                    commands["down"] = newCommand;
+                  }}
+                  triggered={this.state.bottomTriggered}
+                />
+                <CommandTableRow
+                  inputName="left"
+                  onCommandChanged={newCommand => {
+                    commands["left"] = newCommand;
+                  }}
+                  triggered={this.state.leftTriggered}
+                />
+                <CommandTableRow
+                  inputName="right"
+                  onCommandChanged={newCommand => {
+                    commands["right"] = newCommand;
+                  }}
+                  triggered={this.state.rightTriggered}
+                />
+                <CommandTableRow
+                  inputName="press"
+                  onCommandChanged={newCommand => {
+                    commands["press"] = newCommand;
+                  }}
+                  triggered={this.state.pressTriggered}
+                />
               </TableBody>
             </Table>
           </Paper>

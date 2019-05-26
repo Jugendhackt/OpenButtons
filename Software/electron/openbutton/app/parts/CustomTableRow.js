@@ -8,7 +8,7 @@ export default class CustomTableRow extends React.Component {
     super(props);
 
     this.state = {
-      value: ""
+      oldValue: ""
     };
   }
 
@@ -25,11 +25,19 @@ export default class CustomTableRow extends React.Component {
         <TableCell component="th" scope="row">
           {this.props.inputName}
         </TableCell>
-        <TableCell align="right">
+        <TableCell align="left" style={{ width: "75%" }}>
           <TextField
-            value="give in cmd"
+            style={{ width: "100%" }}
+            defaultValue={this.state.oldValue}
+            label="Command"
             onBlur={e => {
-              this.setState({ value: e.target.value });
+              if (this.state.oldValue != e.target.value) {
+                if (this.props.onCommandChanged != null)
+                  this.props.onCommandChanged(e.target.value);
+                this.setState({
+                  oldValue: e.target.value
+                });
+              }
             }}
           />
         </TableCell>
